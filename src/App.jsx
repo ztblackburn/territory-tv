@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS = {
   blur: 20,
   scanlines: 8,
   activePreset: 'Custom',
+  flicker: 0,
 }
 
 const presets = {
@@ -16,18 +17,21 @@ const presets = {
     saturation: 65,
     blur: 28,
     scanlines: 5,
+    flicker: 12,
   },
   '1974 Color Broadcast': {
     grain: 15,
     saturation: 78,
     blur: 15,
     scanlines: 8,
+    flicker: 6,
   },
   'Vintage CRT': {
     grain: 30,
     saturation: 70,
     blur: 25,
     scanlines: 35,
+    flicker: 18,
   },
 }
 
@@ -38,6 +42,7 @@ function App() {
   const [blur, setBlur] = useState(DEFAULT_SETTINGS.blur)
   const [scanlines, setScanlines] = useState(DEFAULT_SETTINGS.scanlines)
   const [activePreset, setActivePreset] = useState(DEFAULT_SETTINGS.activePreset)
+const [flicker, setFlicker] = useState(DEFAULT_SETTINGS.flicker)
 
   const [settingsLoaded, setSettingsLoaded] = useState(false)
 
@@ -57,6 +62,7 @@ function App() {
       setBlur(saved.blur ?? DEFAULT_SETTINGS.blur)
       setScanlines(saved.scanlines ?? DEFAULT_SETTINGS.scanlines)
       setActivePreset(saved.activePreset ?? DEFAULT_SETTINGS.activePreset)
+      setFlicker(saved.flicker ?? DEFAULT_SETTINGS.flicker)
 
       setSettingsLoaded(true)
     })
@@ -73,6 +79,7 @@ function App() {
       blur,
       scanlines,
       activePreset,
+      flicker,
     }
 
     if (globalThis.chrome?.storage?.local) {
@@ -117,6 +124,7 @@ function App() {
     setSaturation(preset.saturation)
     setBlur(preset.blur)
     setScanlines(preset.scanlines)
+    setFlicker(preset.flicker)
     setActivePreset(name)
   }
 
@@ -194,6 +202,13 @@ function App() {
       onChange={setScanlines}
       onInteract={markCustom}
     />
+
+    <FilterSlider
+    label="Film Flicker"
+    value={flicker}
+    onChange={setFlicker}
+    onInteract={markCustom}
+  />
 
     <button
       className="reset"

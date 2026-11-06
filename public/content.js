@@ -1,3 +1,4 @@
+
 (() => {
   const DEFAULT_SETTINGS = {
     enabled: true,
@@ -5,12 +6,15 @@
     saturation: 72,
     blur: 20,
     scanlines: 8,
+    flicker: 0,
   }
 
   const settings = { ...DEFAULT_SETTINGS }
 
   let currentPlayer = null
   let overlay = null
+  let flickerTimer = null
+  let flickerTimeout = null
 
   const style = document.createElement('style')
 
@@ -52,25 +56,34 @@
       mix-blend-mode: color;
     }
 
-.territory-tv-vignette {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(33, 16, 166, 0.85) 0%,
-      rgba(124, 20, 158, 0.32) 10%,
-      rgba(0, 0, 0, 0.20) 55%,
-      rgba(0, 76, 3, 0.2) 100%,
-      transparent 90%
-    ),
-    radial-gradient(
-      ellipse at center,
-      transparent 45%,
-      rgba(0, 0, 0, 0.35) 100%
-    );
-  pointer-events: none;
-}
+    .territory-tv-vignette {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(33, 16, 166, 0.85) 0%,
+          rgba(124, 20, 158, 0.32) 10%,
+          rgba(0, 0, 0, 0.20) 55%,
+          rgba(0, 76, 3, 0.2) 100%,
+          transparent 90%
+        ),
+        radial-gradient(
+          ellipse at center,
+          transparent 45%,
+          rgba(0, 0, 0, 0.35) 100%
+        );
+      pointer-events: none;
+    }
+
+    .territory-tv-flicker {
+      position: absolute;
+      inset: 0;
+      background: black;
+      opacity: 0;
+      pointer-events: none;
+      transition: none;
+    }
 
     @keyframes territoryGrain {
       0% { transform: translate(0,0); }
@@ -86,6 +99,49 @@
     return document.querySelector('#movie_player')
   }
 
+  function stopFlicker() {
+    clearTimeout(flickerTimer)
+    clearTimeout(flickerTimeout)
+
+    flickerTimer = null
+    flickerTimeout = null
+
+    if (overlay) {
+      const flickerLayer = overlay.querySelector('.territory-tv-flicker')
+      if (flickerLayer) flickerLayer.style.opacity = '0'
+    }
+  }
+
+  function scheduleFlicker() {
+    stopFlicker()
+
+    if (!settings.enabled || !settings.flicker || !overlay) return
+
+    const intensity = Math.max(0, Math.min(settings.flicker, 100))
+
+    // Higher settings produce more frequent dark-frame interruptions.
+    const delay = 1800 + Math.random() * 4200 -
+      (intensity / 100) * 1200
+
+    flickerTimer = setTimeout(() => {
+      if (!settings.enabled || !overlay) return
+
+      const flickerLayer = overlay.querySelector('.territory-tv-flicker')
+      if (!flickerLayer) return
+
+      // Keep the dark frames brief and vary their intensity.
+      const darkness = 0.15 + (intensity / 100) * 0.65
+      const duration = 45 + Math.random() * 65
+
+      flickerLayer.style.opacity = String(darkness)
+
+      flickerTimeout = setTimeout(() => {
+        flickerLayer.style.opacity = '0'
+        scheduleFlicker()
+      }, duration)
+    }, delay)
+  }
+
   function updateEffects() {
     const player = findPlayer()
 
@@ -96,6 +152,8 @@
     if (!video) return
 
     if (currentPlayer !== player) {
+      stopFlicker()
+
       if (overlay) overlay.remove()
 
       currentPlayer = player
@@ -107,6 +165,7 @@
 
       if (overlay) overlay.style.display = 'none'
 
+      stopFlicker()
       return
     }
 
@@ -127,6 +186,7 @@
         <div class="territory-tv-scanlines"></div>
         <div class="territory-tv-warmth"></div>
         <div class="territory-tv-vignette"></div>
+        <div class="territory-tv-flicker"></div>
       `
 
       player.appendChild(overlay)
@@ -140,8 +200,10 @@
     overlay.querySelector('.territory-tv-scanlines').style.opacity =
       settings.scanlines / 100
 
-      overlay.querySelector('.territory-tv-vignette').style.opacity =
-  Math.min(settings.blur / 30, 1)
+    overlay.querySelector('.territory-tv-vignette').style.opacity =
+      Math.min(settings.blur / 30, 1)
+
+    scheduleFlicker()
   }
 
   // Receive live updates from the popup.
@@ -152,7 +214,7 @@
     }
   })
 
-  // Also respond to settings restored or changed in Chrome storage.
+  // Respond to settings restored or changed in Chrome storage.
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'local' && changes.territorySettings) {
       Object.assign(settings, changes.territorySettings.newValue)
