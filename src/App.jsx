@@ -39,8 +39,6 @@ function App() {
   const [scanlines, setScanlines] = useState(DEFAULT_SETTINGS.scanlines)
   const [activePreset, setActivePreset] = useState(DEFAULT_SETTINGS.activePreset)
 
-  const [videoUrl, setVideoUrl] = useState(null)
-  const [videoName, setVideoName] = useState('')
   const [settingsLoaded, setSettingsLoaded] = useState(false)
 
   // Load saved settings when the popup opens.
@@ -122,22 +120,6 @@ function App() {
     setActivePreset(name)
   }
 
-  const handleVideoUpload = (event) => {
-    const file = event.target.files[0]
-
-    if (file) {
-      if (videoUrl) URL.revokeObjectURL(videoUrl)
-
-      setVideoUrl(URL.createObjectURL(file))
-      setVideoName(file.name)
-    }
-  }
-
-  const filterStyle = enabled
-    ? {
-        filter: `sepia(0.18) saturate(${saturation}%) contrast(90%) brightness(103%) blur(${blur / 100}px)`,
-      }
-    : {}
 
   const markCustom = () => setActivePreset('Custom')
 
@@ -160,131 +142,73 @@ function App() {
         </button>
       </header>
 
-      <main>
-        <section className="preview">
-          <div className="preview-label">LIVE BROADCAST PREVIEW</div>
+     <main>
+  <section className="controls">
+    <div className="section-heading">
+      <div>
+        <h2>PICTURE SETTINGS</h2>
+        <p>Customize your vintage broadcast</p>
+      </div>
+    </div>
 
-          <div className="screen">
-            {videoUrl ? (
-              <video
-                src={videoUrl}
-                controls
-                autoPlay
-                style={filterStyle}
-              />
-            ) : (
-              <div className="placeholder">
-                <span>1973</span>
-                <h2>TERRITORY WRESTLING</h2>
-                <p>CLASSIC BROADCAST EXPERIENCE</p>
-                <label className="upload-button">
-                  LOAD WRESTLING VIDEO
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoUpload}
-                    hidden
-                  />
-                </label>
-              </div>
-            )}
+    <div className="preset-selector">
+      {Object.keys(presets).map((name) => (
+        <button
+          key={name}
+          className={
+            activePreset === name
+              ? 'preset-button selected'
+              : 'preset-button'
+          }
+          onClick={() => applyPreset(name)}
+        >
+          {name}
+        </button>
+      ))}
+    </div>
 
-            {enabled && videoUrl && (
-              <>
-                <div className="grain" style={{ opacity: grain / 100 }} />
-                <div className="scanlines" style={{ opacity: scanlines / 100 }} />
-                <div className="warm-tint" />
-                <div className="vignette" />
-                <div className="flicker" />
-              </>
-            )}
-          </div>
+    <FilterSlider
+      label="Film Grain"
+      value={grain}
+      onChange={setGrain}
+      onInteract={markCustom}
+    />
 
-          <div className="preview-footer">
-            <span>CHANNEL 04</span>
-            <span>{videoName || '1973 TERRITORY BROADCAST'}</span>
-            <span>COLOR TV</span>
-          </div>
+    <FilterSlider
+      label="Color Saturation"
+      value={saturation}
+      onChange={setSaturation}
+      onInteract={markCustom}
+    />
 
-          {videoUrl && (
-            <label className="upload-button replace-video">
-              CHANGE VIDEO
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleVideoUpload}
-                hidden
-              />
-            </label>
-          )}
-        </section>
+    <FilterSlider
+      label="Soft Focus"
+      value={blur}
+      onChange={setBlur}
+      onInteract={markCustom}
+    />
 
-        <section className="controls">
-          <div className="section-heading">
-            <div>
-              <h2>PICTURE SETTINGS</h2>
-              <p>Customize your vintage broadcast</p>
-            </div>
-          </div>
+    <FilterSlider
+      label="Scan Lines"
+      value={scanlines}
+      onChange={setScanlines}
+      onInteract={markCustom}
+    />
 
-          <div className="preset-selector">
-            {Object.keys(presets).map((name) => (
-              <button
-                key={name}
-                className={
-                  activePreset === name
-                    ? 'preset-button selected'
-                    : 'preset-button'
-                }
-                onClick={() => applyPreset(name)}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-
-          <FilterSlider
-            label="Film Grain"
-            value={grain}
-            onChange={setGrain}
-            onInteract={markCustom}
-          />
-
-          <FilterSlider
-            label="Color Saturation"
-            value={saturation}
-            onChange={setSaturation}
-            onInteract={markCustom}
-          />
-
-          <FilterSlider
-            label="Soft Focus"
-            value={blur}
-            onChange={setBlur}
-            onInteract={markCustom}
-          />
-
-          <FilterSlider
-            label="Scan Lines"
-            value={scanlines}
-            onChange={setScanlines}
-            onInteract={markCustom}
-          />
-
-          <button
-            className="reset"
-            onClick={() => {
-              setGrain(DEFAULT_SETTINGS.grain)
-              setSaturation(DEFAULT_SETTINGS.saturation)
-              setBlur(DEFAULT_SETTINGS.blur)
-              setScanlines(DEFAULT_SETTINGS.scanlines)
-              setActivePreset('Custom')
-            }}
-          >
-            RESET SETTINGS
-          </button>
-        </section>
-      </main>
+    <button
+      className="reset"
+      onClick={() => {
+        setGrain(DEFAULT_SETTINGS.grain)
+        setSaturation(DEFAULT_SETTINGS.saturation)
+        setBlur(DEFAULT_SETTINGS.blur)
+        setScanlines(DEFAULT_SETTINGS.scanlines)
+        setActivePreset('Custom')
+      }}
+    >
+      RESET SETTINGS
+    </button>
+  </section>
+</main>
 
       <footer>
         TERRITORY TV © 1973 — THE GOLDEN AGE OF WRESTLING
