@@ -2,7 +2,7 @@
 * {
   box-sizing: border-box;
 }
-
+#root{width:450px;}
 body {
   margin: 0;
   background: #171713;
@@ -60,6 +60,7 @@ button {
   border: none;
   padding: 12px 20px;
   letter-spacing: 1px;
+  margin-bottom: 30px;
 }
 
 .toggle:not(.active) {

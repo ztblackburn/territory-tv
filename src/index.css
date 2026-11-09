@@ -109,3 +109,20 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.demo-button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  background: #8b1e1e;
+  color: white;
+  border: 1px solid #c49a50;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.demo-button:hover {
+  background: #a52a2a;
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
+const DEMO_VIDEO_URL = 'https://youtu.be/5-3IwJLcnIA'
 const DEFAULT_SETTINGS = {
   enabled: true,
   grain: 15,
@@ -17,21 +18,21 @@ const presets = {
     saturation: 65,
     blur: 28,
     scanlines: 5,
-    flicker: 12,
+    flicker: 22,
   },
   '1974 Color Broadcast': {
     grain: 15,
     saturation: 78,
     blur: 15,
     scanlines: 8,
-    flicker: 6,
+    flicker: 45,
   },
   'Vintage CRT': {
     grain: 30,
     saturation: 70,
     blur: 25,
     scanlines: 35,
-    flicker: 18,
+    flicker: 38,
   },
 }
 
@@ -115,18 +116,19 @@ const [flicker, setFlicker] = useState(DEFAULT_SETTINGS.flicker)
     blur,
     scanlines,
     activePreset,
+    flicker,
   ])
 
-  const applyPreset = (name) => {
-    const preset = presets[name]
+const applyPreset = (name) => {
+  const preset = presets[name]
 
-    setGrain(preset.grain)
-    setSaturation(preset.saturation)
-    setBlur(preset.blur)
-    setScanlines(preset.scanlines)
-    setFlicker(preset.flicker)
-    setActivePreset(name)
-  }
+  setGrain(preset.grain)
+  setSaturation(preset.saturation)
+  setBlur(preset.blur)
+  setScanlines(preset.scanlines)
+  setFlicker(preset.flicker)
+  setActivePreset(name)
+}
 
 
   const markCustom = () => setActivePreset('Custom')
@@ -142,16 +144,17 @@ const [flicker, setFlicker] = useState(DEFAULT_SETTINGS.flicker)
           </div>
         </div>
 
-        <button
+
+      </header>
+
+     <main>
+  <section className="controls">
+            <button
           className={enabled ? 'toggle active' : 'toggle'}
           onClick={() => setEnabled(!enabled)}
         >
           {enabled ? 'FILTER ON' : 'FILTER OFF'}
         </button>
-      </header>
-
-     <main>
-  <section className="controls">
     <div className="section-heading">
       <div>
         <h2>PICTURE SETTINGS</h2>
@@ -213,16 +216,24 @@ const [flicker, setFlicker] = useState(DEFAULT_SETTINGS.flicker)
     <button
       className="reset"
       onClick={() => {
-        setGrain(DEFAULT_SETTINGS.grain)
-        setSaturation(DEFAULT_SETTINGS.saturation)
-        setBlur(DEFAULT_SETTINGS.blur)
-        setScanlines(DEFAULT_SETTINGS.scanlines)
-        setActivePreset('Custom')
-      }}
+  setGrain(DEFAULT_SETTINGS.grain)
+  setSaturation(DEFAULT_SETTINGS.saturation)
+  setBlur(DEFAULT_SETTINGS.blur)
+  setScanlines(DEFAULT_SETTINGS.scanlines)
+  setFlicker(DEFAULT_SETTINGS.flicker)
+  setActivePreset('Custom')
+}}
     >
       RESET SETTINGS
     </button>
+     <button
+  className="demo-button"
+  onClick={() => chrome.tabs.create({ url: DEMO_VIDEO_URL })}
+>
+  WATCH A CLASSIC MATCH
+</button>
   </section>
+ 
 </main>
 
       <footer>
